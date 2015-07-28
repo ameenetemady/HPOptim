@@ -2,6 +2,8 @@
     # Author: Julien Hoachuck
     # Copyright 2015, Julien Hoachuck, All rights reserved.
 ]]--
+local hpOptimSettings = require('./settings.lua')
+
 local HPOptim = {}
 HPOptim.params = {}
 
@@ -95,8 +97,8 @@ end
 
 function HPOptim.findHP(time)
     -- put these in a script and then pass it argument HPOptim.dir_path... easier for people to change the locations of files etc.
-    os.execute("mongod --fork --logpath $HOME/Desktop/log --dbpath /data/db")
-    os.execute("timeout "..time.."s python $HOME/Desktop/Spearmint/spearmint/main.py "..HPOptim.dir_path) 
+    os.execute("mongod --fork --logpath " .. hpOptimSettings.SpearmintMongoLogfile .. " --dbpath " .. hpOptimSettings.SpearmintMongoDBDir) --ToDo: remove this, do we need to bring up mongodb multiple times? Why can't it continue to run!
+    os.execute("gtimeout "..time.."s python " .. hpOptimSettings.SpearmintScriptPath .. " " .. HPOptim.dir_path) 
     HPOptim.getHP()
 end
 
