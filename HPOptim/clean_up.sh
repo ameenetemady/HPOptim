@@ -3,7 +3,7 @@
 #!/bin/bash
 file1="0"
 file2="0"
-MongoDBPath="/Users/eetemadi1/usr/local/var/Spearmint/db/"
+MongoDBPath="/g/g19/eetemadi/.local/var/db/"
 
 find $MongoDBPath -maxdepth 1 -type f -name "spearmint.*" 2>/dev/null | grep -q . && file1=1
 if [ $file1 -eq 1 ]; then
