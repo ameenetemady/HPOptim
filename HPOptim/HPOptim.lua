@@ -1,3 +1,4 @@
+
 --[[
     # Author: Julien Hoachuck
     # Copyright 2015, Julien Hoachuck, All rights reserved.
@@ -63,42 +64,49 @@ function HPOptim.getHP()
 
     local filenames = split(result, '\n')
 
+    local cost = 1000
     -- Take each file name and parse out the important values
     for k,v in pairs(filenames) do 
     -- Put into its own function
-        local file = io.open(HPOptim.dir_path.."/output/"..v,"r") -- remember to prepend the whole path
+        local file = io.open(HPOptim.dir_path.."/output/"..v,"r")
         io.input(file)
         local content = file:read("*all")
         io.close(file)
      
+        print(string.match(content, 'Got result ([%d%.]+)'))
         
-        local keyset={}
-        local n=0
-        for k,v in pairs(HPOptim.params) do
-            n=n+1
-            keyset[n]=k
-        end
-        
-        for i=1,table.getn(keyset) do
-          if keyset[i] == "error" then
+        if cost >= tonumber(string.match(content, 'Got result ([%d%.]+)')) then -- if current result smaller then assign
+            local keyset={}
+            local n=0
+            for k,v in pairs(HPOptim.params) do
+                n=n+1
+                keyset[n]=k
+            end
             
-          else
-            local withAlpha =  string.match(content,keyset[i]..'[\n].?[%d%.]+')
-            HPOptim.params[keyset[i]] = tonumber(string.match(withAlpha,'[%d%.]+'))
-          end 
-        end
+            for i=1,table.getn(keyset) do
+              if keyset[i] == "error" then
+                
+              else
+                local withAlpha =  string.match(content,keyset[i]..'[\n].?[%d%.]+')
+                HPOptim.params[keyset[i]] = tonumber(string.match(withAlpha,'[%d%.]+'))
+              end 
+            end
 
+            cost = tonumber(string.match(content, 'Got result ([%d%.]+)'))
+       		HPOptim.params['error'] = cost
+
+        end
         -- Take the final value out
-        local cost = string.match(content, 'Got result ([%d%.]+)')
-        HPOptim.params['error'] = cost
+        --cost = tonumber(string.match(content, 'Got result ([%d%.]+)'))
+        --HPOptim.params['error'] = cost
   
     end
 end
 
 function HPOptim.findHP(time)
-    -- put these in a script and then pass it argument HPOptim.dir_path... easier for people to change the locations of files etc.
+    -- put these in a script and then pass it argument HPOptim.... easier for people to change the locations of files etc.
     os.execute("mongod --fork --logpath " .. hpOptimSettings.SpearmintMongoLogfile .. " --dbpath " .. hpOptimSettings.SpearmintMongoDBDir) --ToDo: remove this, do we need to bring up mongodb multiple times? Why can't it continue to run!
-    os.execute("gtimeout "..time.."s python " .. hpOptimSettings.SpearmintScriptPath .. " " .. HPOptim.dir_path) 
+    os.execute("timeout "..time.."s python " .. hpOptimSettings.SpearmintScriptPath .. " " .. HPOptim.dir_path) 
     HPOptim.getHP()
 end
 
@@ -106,3 +114,4 @@ function HPOptim.export2CSV()
 end
 
 return HPOptim
+
